@@ -1,0 +1,499 @@
+{% extends 'Calls/layout_user.html' %}
+
+{% block title %}Novo Chamado - 32º BIL Mth{% endblock %}
+
+{% block page_title %}Novo Chamado{% endblock %}
+{% block page_subtitle %}Abra um novo chamado para suporte técnico{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <div class="form-icon">
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <h2>Abrir Novo Chamado</h2>
+            <p>Preencha as informações abaixo para registrar seu chamado de suporte</p>
+        </div>
+
+        <form class="chamado-form" method="post">
+            {% csrf_token %}
+            
+            <!-- Informações Básicas -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Informações Básicas
+                </h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="titulo">Título do Chamado</label>
+                        <input type="text" id="titulo" name="titulo" required 
+                               placeholder="Ex: Problema com impressora do setor">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label for="categoria">Categoria</label>
+                        <select id="categoria" name="categoria" required>
+                            <option value="">Selecione uma categoria</option>
+                            {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}">{{ categoria.categoria }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group half">
+                        <label for="prioridade">Prioridade</label>
+                        <select id="prioridade" name="prioridade" required>
+                            <option value="">Selecione a prioridade</option>
+                            {% for prioridade in prioridades %}
+                            <option value="{{ prioridade.id }}">{{ prioridade.prioridade }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="descricao">Descrição do Problema</label>
+                        <textarea id="descricao" name="descricao" rows="5" required 
+                                  placeholder="Descreva detalhadamente o problema encontrado, incluindo quando começou, mensagens de erro (se houver) e o que você estava fazendo quando o problema ocorreu..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar
+                </button>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Criar Chamado
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Card de Dicas -->
+    <div class="tips-card">
+        <div class="tips-header">
+            <i class="fas fa-lightbulb"></i>
+            <h3>Dicas para um bom chamado</h3>
+        </div>
+        <ul class="tips-list">
+            <li>
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Seja específico:</strong> Descreva o problema de forma clara e detalhada
+                </div>
+            </li>
+            <li>
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Inclua contexto:</strong> Quando o problema começou e o que você estava fazendo
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .form-container {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 32px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .form-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 24px;
+        color: white;
+    }
+
+    .form-header h2 {
+        font-size: 24px;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+
+    .form-header p {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .form-section {
+        margin-bottom: 32px;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 18px;
+        color: #1e293b;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .section-title i {
+        color: #0d9488;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        flex: 1;
+    }
+
+    .form-group.half {
+        flex: 0.5;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #0d9488;
+        box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .file-upload {
+        position: relative;
+    }
+
+    .file-upload input[type="file"] {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .file-upload-area {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 32px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+    }
+
+    .file-upload-area:hover {
+        border-color: #0d9488;
+        background: #f0fdfa;
+    }
+
+    .file-upload-area i {
+        font-size: 32px;
+        color: #64748b;
+        margin-bottom: 12px;
+    }
+
+    .file-upload-area p {
+        color: #374151;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .file-upload-area span {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: flex-end;
+        padding-top: 24px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .tips-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        height: fit-content;
+        position: sticky;
+        top: 32px;
+    }
+
+    .tips-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .tips-header i {
+        color: #fbbf24;
+        font-size: 20px;
+    }
+
+    .tips-header h3 {
+        font-size: 16px;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .tips-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .tips-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 3px solid #0d9488;
+    }
+
+    .tips-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .tips-list i {
+        color: #059669;
+        font-size: 16px;
+        margin-top: 2px;
+    }
+
+    .tips-list strong {
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    .tips-list div {
+        font-size: 13px;
+        color: #475569;
+        line-height: 1.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-container {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .form-row {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group.half {
+            flex: 1;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .tips-card {
+            position: static;
+        }
+    }
+
+    /* Animações */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-card {
+        animation: slideInUp 0.6s ease;
+    }
+
+    .tips-card {
+        animation: slideInUp 0.6s ease 0.2s both;
+    }
+
+    /* Estados de validação */
+    .form-group input:invalid:not(:focus):not(:placeholder-shown),
+    .form-group select:invalid:not(:focus),
+    .form-group textarea:invalid:not(:focus):not(:placeholder-shown) {
+        border-color: #ef4444;
+    }
+
+    .form-group input:valid:not(:focus):not(:placeholder-shown),
+    .form-group select:valid:not(:focus),
+    .form-group textarea:valid:not(:focus):not(:placeholder-shown) {
+        border-color: #059669;
+    }
+
+    /* Indicador de campo obrigatório */
+    .form-group label:has(+ input[required])::after,
+    .form-group label:has(+ select[required])::after,
+    .form-group label:has(+ textarea[required])::after {
+        content: " *";
+        color: #ef4444;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // File upload handling
+        const fileInput = document.getElementById('anexos');
+        const fileUploadArea = document.querySelector('.file-upload-area');
+        
+        fileInput.addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                const fileNames = Array.from(files).map(file => file.name).join(', ');
+                fileUploadArea.innerHTML = `
+                    <i class="fas fa-check-circle" style="color: #059669;"></i>
+                    <p style="color: #059669;">${files.length} arquivo(s) selecionado(s)</p>
+                    <span style="font-size: 11px;">${fileNames}</span>
+                `;
+            }
+        });
+
+        // Drag and drop functionality
+        fileUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#0d9488';
+            this.style.background = '#f0fdfa';
+        });
+
+        fileUploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#cbd5e1';
+            this.style.background = '#f8fafc';
+        });
+
+        fileUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = '#cbd5e1';
+            this.style.background = '#f8fafc';
+            
+            const files = e.dataTransfer.files;
+            fileInput.files = files;
+            
+            if (files.length > 0) {
+                const fileNames = Array.from(files).map(file => file.name).join(', ');
+                this.innerHTML = `
+                    <i class="fas fa-check-circle" style="color: #059669;"></i>
+                    <p style="color: #059669;">${files.length} arquivo(s) selecionado(s)</p>
+                    <span style="font-size: 11px;">${fileNames}</span>
+                `;
+            }
+        });
+
+        // Form validation
+        const form = document.querySelector('.chamado-form');
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.style.borderColor = '#ef4444';
+                    field.focus();
+                } else {
+                    field.style.borderColor = '#059669';
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Por favor, preencha todos os campos obrigatórios.');
+            }
+        });
+
+        // Auto-resize textarea
+        const textarea = document.getElementById('descricao');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Priority color coding
+        const prioritySelect = document.getElementById('prioridade');
+        prioritySelect.addEventListener('change', function() {
+            const priority = this.value;
+            this.style.borderColor = {
+                'baixa': '#059669',
+                'media': '#d97706',
+                'alta': '#dc2626',
+                'urgente': '#991b1b'
+            }[priority] || '#e2e8f0';
+        });
+    });
+</script>
+{% endblock %}

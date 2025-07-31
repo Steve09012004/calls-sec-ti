@@ -1,0 +1,52 @@
+{% extends 'Calls/layout_admin.html' %} 
+
+{% load static %}
+
+{% block title %}Dashboard Admin- 32º BIL Mth{% endblock %}
+
+
+{% block content %}
+<!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card" onclick="location.href='{% url 'Calls:admin_calls' %}'">
+                    <div class="stat-icon calls">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="stat-value">{{chamados|length}}</div>
+                    <div class="stat-label">Total de Chamados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pending">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value">{{chamados_andamento|length}}</div>
+                    <div class="stat-label">Aguardando</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon resolved">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value">{{chamados_resolvidos|length}}</div>
+                    <div class="stat-label">Resolvidos</div>
+                </div>
+            </div>
+
+            <!-- Content Card -->
+            <div class="content-card">
+                <h2 style="color: #1e293b; margin-bottom: 24px; font-size: 24px; font-weight: 600;">
+                    Chamados Recentes
+                </h2>
+                <p style="color: #64748b; line-height: 1.6; margin-bottom: 32px;">
+                    Aqui você pode visualizar e gerenciar todos os chamados da seção de informática do batalhão. 
+                    O sistema permite acompanhar o status, prioridade e histórico de cada solicitação.
+                </p>
+                
+                <div style="background: #f8fafc; padding: 24px; border-radius: 12px; border-left: 4px solid #2563eb;">
+                    <h3 style="color: #1e293b; margin-bottom: 8px; font-size: 18px;">Sistema em Funcionamento</h3>
+                    <p style="color: #64748b; margin: 0;">
+                        O sistema de chamados está operacional e pronto para uso. 
+                        Utilize o menu lateral para navegar entre as funcionalidades.
+                    </p>
+                </div>
+            </div>
+{% endblock %}

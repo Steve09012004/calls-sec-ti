@@ -1,0 +1,982 @@
+{% extends 'Calls/layout_user.html' %}
+
+{% block title %}Chamado #{{ chamado.id }} - 32º BIL Mth{% endblock %}
+
+{% block page_title %}Chamado #{{ chamado.id }}{% endblock %}
+{% block page_subtitle %}{{ chamado.titulo }}{% endblock %}
+
+{% block content %}
+<div class="chamado-container">
+    <!-- Header do Chamado -->
+    <div class="chamado-header">
+        <div class="chamado-info">
+            <div class="chamado-status">
+                <span class="status-badge status-{{ chamado.status.status|lower }}">
+                    <i class="fa-regular fa-paper-plane"></i>
+                    {{ chamado.status.status }}
+                </span>
+                <span class="prioridade-badge prioridade-{{ chamado.prioridade.prioridade|lower }}">
+                    {% if chamado.prioridade.prioridade == 'Alta' %}
+                    <i class="fa-solid fa-exclamation"></i>
+                    {% elif chamado.prioridade.prioridade == 'Urgente' %}
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    {% elif chamado.prioridade.prioridade == Urgentíssimo %}
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    {% else %}
+                    <i></i>
+                    {% endif %}
+                    {{ chamado.prioridade.prioridade }}
+                </span>
+            </div>
+            <div class="chamado-meta">
+                <span class="meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    Criado em {{chamado.data_criacao|date:"d/m/Y \\à\\s H:i"}}
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-clock"></i>
+                    Atualizado em {{chamado.data_atualizacao|date:"d/m/Y \\à\\s H:i"}}
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-user"></i>
+                    {{ chamado.usuario.posto_grad }} {{chamado.usuario.nome_de_guerra}}
+                </span>
+            </div>
+        </div>
+        <div class="chamado-actions">
+            <button class="btn btn-secondary" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i>
+                Voltar
+            </button>
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                Imprimir
+            </button>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="chamado-content">
+        <!-- Detalhes do Chamado -->
+        <div class="chamado-details">
+            <div class="detail-card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>Informações do Chamado</h3>
+                </div>
+                <div class="card-content">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Título:</label>
+                            <span>{{ chamado.titulo }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Categoria:</label>
+                            <span class="categoria-tag">
+                                <i class="fas fa-tag"></i>
+                                {{ chamado.categoriaChamado.categoria }}
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Status:</label>
+                            <span class="status-inline status-{{ chamado.status.status|lower }}">
+                                {{ chamado.status.status }}
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Prioridade:</label>
+                            <span class="prioridade-inline prioridade-{{ chamado.prioridade.prioridade|lower }}">
+                                {{ chamado.prioridade.prioridade }}
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Solicitante:</label>
+                            <span>{{ chamado.usuario.posto_grad }} {{ chamado.usuario.nome_de_guerra }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Setor:</label>
+                            <span>{{ chamado.usuario.setor }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Descrição do Problema</h3>
+                </div>
+                <div class="card-content">
+                    <div class="descricao-content">
+                        {{ chamado.descricao|linebreaks }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline de Atualizações -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <i class="fas fa-history"></i>
+                    <h3>Histórico de Atualizações</h3>
+                </div>
+                <div class="card-content">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker created">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h4>Chamado Criado</h4>
+                                    <span class="timeline-date">{{ chamado.data_criacao|date:"d/m/Y \\à\\s H:i"}}</span>
+                                </div>
+                                <p>Chamado criado por {{ chamado.usuario.posto_grad }} {{chamado.usuario.nome_de_guerra}}</p>
+                            </div>
+                        </div>
+
+                        {% if chamado.data_atualizacao != chamado.data_criacao %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker updated">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <h4>Última Atualização</h4>
+                                    <span class="timeline-date">{{ chamado.data_atualizacao|date:"d/m/Y \\à\\s H:i" }}</span>
+                                </div>
+                                <p>Status atual: {{ chamado.status.status }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar com Informações Adicionais -->
+        <div class="chamado-sidebar">
+            <!-- Card de Status -->
+            <div class="sidebar-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Status do Chamado</h3>
+                </div>
+                <div class="card-content">
+                    <div class="status-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"
+                                style="width: {% if chamado.status.status == 'Enviado' %}25%{% elif chamado.status.status == 'Em andamento' %}50%{% elif chamado.status.status == 'Resolvido' %}100%{% else %}0%{% endif %}">
+                            </div>
+                        </div>
+                        <div class="status-steps">
+                            <span
+                                class="step {% if chamado.status.status == 'Enviado' or chamado.status.status == 'Em Andamento' or chamado.status.status == 'Aguardando' or chamado.status.status == 'Resolvido' %}active{% endif %}">Aberto</span>
+                            <span
+                                class="step {% if chamado.status.status == 'Em andamento' or chamado.status.status == 'Aguardando' or chamado.status.status == 'Resolvido' %}active{% endif %}">Em
+                                Andamento</span>
+                            <span
+                                class="step {% if chamado.status.status == 'Resolvido' %}active{% endif %}">Concluído</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Informações Técnicas -->
+            <div class="sidebar-card">
+                <div class="card-header">
+                    <i class="fas fa-cogs"></i>
+                    <h3>Informações Técnicas</h3>
+                </div>
+                <div class="card-content">
+                    <div class="tech-info">
+                        <div class="tech-item">
+                            <i class="fas fa-hashtag"></i>
+                            <div>
+                                <label>ID do Chamado</label>
+                                <span>#{{ chamado.id }}</span>
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-calendar-plus"></i>
+                            <div>
+                                <label>Data de Criação</label>
+                                <span>{{ chamado.data_criacao|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <label>Tempo Decorrido</label>
+                                <span>{{ chamado.data_criacao|timesince }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Ações Rápidas -->
+            <div class="sidebar-card">
+                <div class="card-header">
+                    <i class="fas fa-message"></i>
+                    <h3>Chat</h3>
+                </div>
+                <div class="card-content" id="Chat">
+                    <div class="quick-actions">
+                        {% for mensagem in mensagens %}
+                        {% if mensagem.usuario == user %}
+                        <div class="messageSender"><span class="message">{{mensagem.mensagem}}</span><br><span
+                                style="font-size: 0.6em; float: right; margin-bottom: -10px; margin-top: 7px; color: #ffffff7e;">{{mensagem.data_envio}}</span>
+                        </div>
+                        {% else %}
+                        <div class="messageReceiver"><span class="message">{{mensagem.mensagem}}</span><br><span
+                                style="font-size: 0.6em; float: right; margin-bottom: -10px; margin-top: 7px; margin-right: 10px; color: #0000007e;">{{mensagem.data_envio}}</span>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        <form action="{% url 'Calls:view' chamado.id %}" method="post" class="senderMessage">
+                            <input type="text" placeholder="Digite sua mensagem..." class="form-control" id="message"
+                                name="mensagem" required>
+                            {% csrf_token %}
+                            <button class="action-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .chamado-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .chamado-header {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 24px;
+    }
+
+    .chamado-info {
+        flex: 1;
+    }
+
+    .chamado-status {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .status-badge,
+    .prioridade-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.status-aberto {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .status-badge.status-em-andamento {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .status-badge.status-aguardando {
+        background: #fde68a;
+        color: #d97706;
+    }
+
+    .status-badge.status-concluido {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .status-badge.status-cancelado {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .prioridade-badge.prioridade-baixa {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .prioridade-badge.prioridade-media {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .prioridade-badge.prioridade-alta {
+        background: #fed7aa;
+        color: #ea580c;
+    }
+
+    .prioridade-badge.prioridade-urgente {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .chamado-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .meta-item i,
+    .fa-paper-plane {
+        color: #0d9488;
+    }
+
+    .chamado-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .chamado-content {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 32px;
+    }
+
+    .chamado-details {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .detail-card,
+    .sidebar-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        overflow: hidden;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 24px 32px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .card-header i {
+        color: #0d9488;
+        font-size: 18px;
+    }
+
+    .card-header h3 {
+        font-size: 16px;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .card-content {
+        padding: 32px;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .detail-item label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .detail-item span {
+        color: #1e293b;
+        font-size: 15px;
+    }
+
+    .categoria-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f0f9ff;
+        color: #0369a1;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        width: fit-content;
+    }
+
+    .status-inline {
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        text-transform: uppercase;
+        width: fit-content;
+    }
+
+    .status-inline.status-aberto {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .status-inline.status-em-andamento {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .status-inline.status-aguardando {
+        background: #fde68a;
+        color: #d97706;
+    }
+
+    .status-inline.status-concluido {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .prioridade-inline {
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        text-transform: uppercase;
+        width: fit-content;
+    }
+
+    .prioridade-inline.prioridade-baixa {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .prioridade-inline.prioridade-media {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .prioridade-inline.prioridade-alta {
+        background: #fed7aa;
+        color: #ea580c;
+    }
+
+    .prioridade-inline.prioridade-urgente {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .descricao-content {
+        background: #f8fafc;
+        padding: 24px;
+        border-radius: 12px;
+        border-left: 4px solid #0d9488;
+        line-height: 1.6;
+        color: #374151;
+    }
+
+    .timeline {
+        position: relative;
+        display: flex;
+        flex-direction: column-reverse;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #e2e8f0;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 60px;
+        margin-bottom: 32px;
+        padding-top: 0;
+    }
+
+    .timeline-item:last-child {
+        padding-bottom: 0;
+    }
+
+    .timeline-marker {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: white;
+        z-index: 2;
+    }
+
+    .timeline-marker.created {
+        background: #059669;
+    }
+
+    .timeline-marker.updated {
+        background: #2563eb;
+    }
+
+    .timeline-content {
+        background: #f8fafc;
+        padding: 16px 20px;
+        border-radius: 12px;
+        border-left: 3px solid #0d9488;
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .timeline-header h4 {
+        color: #1e293b;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .timeline-date {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .timeline-content p {
+        color: #475569;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .chamado-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .sidebar-card {
+        height: fit-content;
+    }
+
+    .sidebar-card .card-content {
+        padding: 24px;
+    }
+
+    .status-progress {
+        text-align: center;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #0d9488 0%, #14b8a6 100%);
+        transition: width 0.3s ease;
+    }
+
+    .status-steps {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    .step {
+        color: #94a3b8;
+        transition: color 0.3s ease;
+    }
+
+    .step.active {
+        color: #0d9488;
+    }
+
+    .tech-info {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .tech-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .tech-item i {
+        color: #0d9488;
+        font-size: 16px;
+        width: 20px;
+    }
+
+    .tech-item div {
+        flex: 1;
+    }
+
+    .tech-item label {
+        display: block;
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tech-item span {
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    #Chat {
+        overflow: overlay;
+        max-height: 500px;
+        overflow-x: hidden;
+        position: relative;
+
+        &::-webkit-scrollbar-track {
+            background-color: #F4F4F4;
+        }
+
+        &::-webkit-scrollbar {
+            width: 6px;
+            background: #14b8a6;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #14b8a6;
+        }
+    }
+
+    .quick-actions {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-wrap: break-word;
+        gap: 16px;
+
+        & .senderMessage {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            margin-top: 18px;
+            gap: 12px;
+            bottom: 0%;
+            z-index: 2;
+            position: sticky;
+
+            & input {
+                position: absolute;
+                width: 82%;
+                flex: 1;
+                padding: 12px;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px 0px 0px 8px;
+                font-size: 14px;
+                color: #475569;
+                transition: all 0.3s ease;
+
+                &::placeholder {
+                    color: #94a3b8;
+                }
+
+                &:focus {
+                    outline: none !important;
+                    border-color: #0d9488;
+                    border-right: none;
+                }
+            }
+
+            & button {
+                height: 42px;
+                position: absolute;
+                left: 82%;
+                padding: 12px 16px;
+                background: #0d9488;
+                color: white;
+                border: none;
+                border-radius: 0px 8px 8px 0px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                & i {
+                    color: white;
+                    transition: all 0.1s ease;
+                }
+
+                &:hover {
+                    background: #14b8a6;
+                    transform: translateY(0px);
+
+                    & i {
+                        transform: skewY(10deg);
+                    }
+                }
+            }
+        }
+
+        & .messageSender {
+            margin-left: auto;
+            transform: skewX(15deg);
+            width: 65%;
+            padding: 13px;
+            padding-left: 18px;
+            border-radius: 32px 32px 0px 32px;
+            background: #0d9488;
+            color: #d1fae5;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 2px 2px 13px -3px rgb(0, 0, 0);
+            ;
+            transition: background-color 0.3s ease;
+        }
+
+        & .messageReceiver {
+            transform: skewX(-15deg);
+            width: 65%;
+            padding: 12px;
+            padding-left: 18px;
+            border-radius: 32px 32px 32px 0px;
+            border: 1px solid #059669;
+            background: #b6f5e6d5;
+            color: #0d9488;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 2px 2px 13px -3px rgb(0, 0, 0);
+            transition: background-color 0.3s ease;
+        }
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #475569;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background: #0d9488;
+        color: white;
+        border-color: #0d9488;
+        transform: translateY(-2px);
+    }
+
+    .action-btn i {
+        color: #0d9488;
+        font-size: 16px;
+    }
+
+    .action-btn:hover i {
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .chamado-header {
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chamado-content {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .chamado-meta {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .chamado-actions {
+            width: 100%;
+        }
+
+        .chamado-actions .btn {
+            flex: 1;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-header {
+            padding: 20px;
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+
+        .chamado-actions,
+        .quick-actions {
+            display: none;
+        }
+
+        .chamado-container {
+            box-shadow: none;
+        }
+
+        .detail-card,
+        .sidebar-card {
+            box-shadow: none;
+            border: 1px solid #ccc;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .chamado-header {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .detail-card {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .sidebar-card {
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .detail-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .detail-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .sidebar-card:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+
+    .sidebar-card:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Smooth scroll for timeline
+        const timelineItems = document.querySelectorAll('.timeline-item');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        timelineItems.forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            item.style.transition = 'all 0.6s ease';
+            observer.observe(item);
+        });
+
+        // Copy ID to clipboard
+        const techItems = document.querySelectorAll('.tech-item');
+        techItems.forEach(item => {
+            const idSpan = item.querySelector('span');
+            if (idSpan && idSpan.textContent.includes('#')) {
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', function () {
+                    navigator.clipboard.writeText(idSpan.textContent);
+                    const originalText = idSpan.textContent;
+                    idSpan.textContent = 'Copiado!';
+                    setTimeout(() => {
+                        idSpan.textContent = originalText;
+                    }, 2000);
+                });
+            }
+        });
+
+        // Progress bar animation
+        const progressFill = document.querySelector('.progress-fill');
+        if (progressFill) {
+            const targetWidth = progressFill.style.width;
+            progressFill.style.width = '0%';
+            setTimeout(() => {
+                progressFill.style.width = targetWidth;
+            }, 500);
+        }
+
+    });
+</script>
+{% endblock %}

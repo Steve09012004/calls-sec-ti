@@ -1,0 +1,1090 @@
+{% extends 'Calls/layout_admin.html' %}
+{% load calls_tags %}
+
+
+{% block title %}Meus Chamados - 32º BIL Mth{% endblock %}
+
+{% block page_title %}Meus Chamados{% endblock %}
+{% block page_subtitle %}Acompanhe o status dos seus chamados de suporte{% endblock %}
+
+{% block content %}
+<div class="calls-container">
+    <!-- Filtros e Busca -->
+    <div class="filters-section">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Buscar chamados..." id="searchInput">
+        </div>
+        
+        <div class="filters">
+            <select id="statusFilter" class="filter-select">
+                <option value="">Todos os Status</option>
+                <option value="Enviado">Aberto</option>
+                <option value="Em andamento">Em Andamento</option>
+                <option value="Resolvido">Resolvido</option>
+            </select>
+            
+            <select id="priorityFilter" class="filter-select">
+                <option value="">Todas as Prioridades</option>
+                <option value="baixa">Baixa</option>
+                <option value="media">Média</option>
+                <option value="alta">Alta</option>
+                <option value="urgente">Urgente</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Lista de Chamados -->
+    <div class="calls-grid">
+        {% for chamado in chamados %}
+        <div class="call-card" data-status="{{ chamado.status.status }}" data-priority="{{ chamado.prioridade.prioridade|lower }}">
+            <div class="call-header">
+                <div class="call-id">
+                    <span class="id-label">#{{ chamado.id }}</span>
+                    <div class="call-notifications">
+                        <div class="notification-bell">
+                            <i class="fas fa-bell"></i>
+                            
+                            {% mensagens_nao_lidas chamado request.user as qtd_nao_lidas %}
+                            {% if qtd_nao_lidas > 0 %}
+                                <span class="notification-count">{{ qtd_nao_lidas }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="call-status">
+                    <span class="status-badge status-{{ chamado.status.status|lower }}">
+                        {{ chamado.status.status }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="call-content">
+                <h3 class="call-title">{{ chamado.titulo }}</h3>
+                <p class="call-description">{{ chamado.descricao|truncatewords:20 }}</p>
+                
+                <div class="call-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>{{ chamado.data_criacao|date:"d/m/Y" }}</span>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>{{ chamado.data_criacao|timesince }} atrás</span>
+                    </div>
+                    
+                    <div class="meta-item">
+                        <i class="fas fa-tag"></i>
+                        <span>{{ chamado.categoria.categoria }}</span>
+                    </div>
+                </div>
+
+                <div class="call-priority">
+                    <span class="priority-indicator priority-{{ chamado.prioridade.prioridade|lower }}">
+                        <i class="fas fa-flag"></i>
+                        {{ chamado.prioridade.prioridade|title }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="call-actions">
+                <a href="{% url 'Calls:view' chamado.id %}" class="btn-view">
+                    <i class="fas fa-eye"></i>
+                    Visualizar
+                </a>
+                
+                <div class="call-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {% if chamado.status.status == 'Enviado' %}25%{% elif chamado.status.status == 'Em andamento' %}50%{% elif chamado.status.status == 'Resolvido' %}75%{% else %}100%{% endif %}"></div>
+                    </div>
+                    <span class="progress-text">
+                        {% if chamado.status.status == 'Enviado' %}Aguardando{% elif chamado.status.status == 'Em andamento' %}Em progresso{% elif chamado.status.status == 'Resolvido' %}Quase pronto{% else %}Concluído{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <h3>Nenhum chamado encontrado</h3>
+            <p>Você ainda não possui chamados registrados</p>
+            <a href="{% url 'Calls:new_call' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Criar Primeiro Chamado
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="stats-summary">
+        <div class="summary-card">
+            <div class="summary-icon aberto">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="summary-content">
+                <span class="summary-number">{{ chamados_abertos }}</span>
+                <span class="summary-label">Abertos</span>
+            </div>
+        </div>
+        
+        <div class="summary-card">
+            <div class="summary-icon em_andamento">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div class="summary-content">
+                <span class="summary-number">{{ chamados_em_andamento }}</span>
+                <span class="summary-label">Em Andamento</span>
+            </div>
+        </div>
+        
+        <div class="summary-card">
+            <div class="summary-icon resolvido">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="summary-content">
+                <span class="summary-number">{{ chamados_resolvidos }}</span>
+                <span class="summary-label">Resolvidos</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Primeiro arquivo - CSS principal */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    color: #334155;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Aside Sidebar */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar-header {
+    padding: 32px 24px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.battalion-name {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.battalion-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.nav-menu {
+    padding: 24px 0;
+    list-style: none;
+}
+
+.nav-item {
+    margin-bottom: 8px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(4px);
+}
+
+.nav-link.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-right: 4px solid #fbbf24;
+}
+
+.nav-link i {
+    width: 24px;
+    font-size: 18px;
+    margin-right: 16px;
+}
+
+.nav-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.user-profile {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 20px;
+}
+
+.user-details h4 {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.user-details p {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 48px 40px;
+    background: transparent;
+}
+
+.page-header {
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.page-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.page-subtitle {
+    color: #64748b;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+}
+
+.btn-secondary {
+    background: white;
+    color: #475569;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.content-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    margin-bottom: 32px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    cursor: pointer;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.stat-icon.calls {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #2563eb;
+}
+
+.stat-icon.pending {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #d97706;
+}
+
+.stat-icon.resolved {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #16a34a;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 24px 20px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content-card {
+    animation: fadeInUp 0.6s ease;
+}
+
+.stat-card {
+    animation: fadeInUp 0.6s ease;
+}
+
+.stat-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.stat-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.stat-card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+/* Segundo arquivo - CSS de chamados convertido para azul */
+.calls-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* Filtros e Busca */
+.filters-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 16px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.filters {
+    display: flex;
+    gap: 16px;
+}
+
+.filter-select {
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Grid de Chamados */
+.calls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.call-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgb(145, 185, 236);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.call-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    border-color: #2563eb;
+}
+
+.call-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.call-card:hover::before {
+    opacity: 1;
+}
+
+/* Header do Chamado */
+.call-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.call-id {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.id-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.call-notifications {
+    position: relative;
+}
+
+.notification-bell {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    background: #f8fafc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.notification-bell:hover {
+    background: #2563eb;
+    color: white;
+}
+
+.notification-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-aberto {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-em_andamento {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-resolvido {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-fechado {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* Conteúdo do Chamado */
+.call-content {
+    margin-bottom: 20px;
+}
+
+.call-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.call-description {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.call-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.meta-item i {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.call-priority {
+    margin-bottom: 16px;
+}
+
+.priority-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.priority-baixa {
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.priority-media {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.priority-alta {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.priority-urgente {
+    background: #450a0a;
+    color: #fca5a5;
+}
+
+/* Ações do Chamado */
+.call-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-view:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+}
+
+.call-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 100px;
+}
+
+.progress-bar {
+    height: 4px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    transition: width 0.6s ease;
+}
+
+.progress-text {
+    font-size: 11px;
+    color: #64748b;
+    text-align: center;
+}
+
+/* Estado Vazio */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 40px;
+    background: white;
+    border-radius: 16px;
+    border: 2px dashed #e2e8f0;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: #f8fafc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 32px;
+    color: #94a3b8;
+}
+
+.empty-state h3 {
+    color: #1e293b;
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 24px;
+}
+
+/* Estatísticas Resumidas */
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.summary-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.summary-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.summary-icon.aberto {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.summary-icon.em_andamento {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.summary-icon.resolvido {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.summary-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-box {
+        min-width: auto;
+    }
+
+    .filters {
+        flex-direction: column;
+    }
+
+    .calls-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .call-actions {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .call-progress {
+        min-width: auto;
+    }
+
+    .stats-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animações */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.call-card {
+    animation: slideInUp 0.6s ease;
+}
+
+.call-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.call-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.call-card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.summary-card {
+    animation: slideInUp 0.6s ease;
+}
+
+.summary-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.summary-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Funcionalidade de busca
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const priorityFilter = document.getElementById('priorityFilter');
+        const callCards = document.querySelectorAll('.call-card');
+        statusFilter.value = 'Enviado'; // Set default status filter
+        function filterCalls() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            const priorityValue = priorityFilter.value;
+
+            callCards.forEach(card => {
+                const title = card.querySelector('.call-title').textContent.toLowerCase();
+                const description = card.querySelector('.call-description').textContent.toLowerCase();
+                const idLabel = card.querySelector('.id-label').textContent.toLowerCase();
+                const cardStatus = card.dataset.status;
+                const cardPriority = card.dataset.priority;
+
+                const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm) || idLabel.includes(searchTerm);
+                const matchesStatus = !statusValue || cardStatus === statusValue;
+                const matchesPriority = !priorityValue || cardPriority === priorityValue;
+
+                if (matchesSearch && matchesStatus && matchesPriority) {
+                    card.style.display = 'block';
+                    card.style.animation = 'slideInUp 0.4s ease';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function resetFilters() {
+            statusFilter.value = 'Enviado';
+            filterCalls();
+        }
+
+        // Reset filters on page load
+        resetFilters();
+        // Event listeners para filtros
+        searchInput.addEventListener('input', filterCalls);
+        statusFilter.addEventListener('change', filterCalls);
+        priorityFilter.addEventListener('change', filterCalls);
+
+        // Animação de hover nos sinos de notificação
+        const notificationBells = document.querySelectorAll('.notification-bell');
+        notificationBells.forEach(bell => {
+            bell.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+            });
+            
+            bell.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Efeito de loading ao clicar no botão visualizar
+        const viewButtons = document.querySelectorAll('.btn-view');
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
+                this.style.pointerEvents = 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}

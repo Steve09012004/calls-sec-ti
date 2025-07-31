@@ -1,0 +1,96 @@
+{% extends 'Calls/layout_user.html' %}
+
+{% load static %}
+
+{% block title %}Dashboard Usuário - 32º BIL Mth{% endblock %}
+
+{% block content %}
+
+<!-- Banner de Boas-vindas -->
+<div class="welcome-banner">
+    <i class="fas fa-user-circle welcome-icon"></i>
+    <div class="welcome-text">
+        <h3>Olá, {{user.nome_de_guerra}}!</h3>
+        <p>Gerencie seus chamados de forma simples e rápida</p>
+    </div>
+</div>
+
+<!-- Stats Cards para Usuários -->
+<div class="stats-grid">
+    <div class="stat-card" onclick="location.href='{% url 'Calls:user_calls' %}'">
+        <div class="stat-icon my-calls">
+            <i class="fas fa-ticket-alt"></i>
+        </div>
+        <div class="stat-value">{{chamados|length}}</div>
+        <div class="stat-label">Meus Chamados</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon pending">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-value">{{chamados_andamento|length}}</div>
+        <div class="stat-label">Em Andamento</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon completed">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-value">{{chamados_resolvidos|length}}</div>
+        <div class="stat-label">Concluídos</div>
+    </div>
+</div>
+
+<!-- Ações Rápidas -->
+<div class="quick-actions">
+    <a href="{% url 'Calls:new_call' %}" class="quick-action">
+        <div class="quick-action-icon">
+            <i class="fas fa-plus"></i>
+        </div>
+        <div class="quick-action-text">
+            <h4>Novo Chamado</h4>
+            <p>Solicitar suporte técnico</p>
+        </div>
+    </a>
+    <a href="{% url 'Calls:user_calls' %}" class="quick-action">
+        <div class="quick-action-icon">
+            <i class="fas fa-list"></i>
+        </div>
+        <div class="quick-action-text">
+            <h4>Meus Chamados</h4>
+            <p>Acompanhar solicitações</p>
+        </div>
+    </a>
+    <a href="#" class="quick-action">
+        <div class="quick-action-icon">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="quick-action-text">
+            <h4>Manual de Uso</h4>
+            <p>Guia do usuário</p>
+        </div>
+    </a>
+</div>
+
+<!-- Content Card -->
+<div class="content-card">
+    <h2 style="color: #1e293b; margin-bottom: 16px; font-size: 22px; font-weight: 600;">
+        Chamados Recentes
+    </h2>
+    <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
+        Acompanhe o status dos seus chamados mais recentes e veja o histórico de solicitações.
+    </p>
+
+    <div style="background: #f0fdfa; padding: 20px; border-radius: 12px; border-left: 4px solid #0d9488;">
+        <h3 style="color: #134e4a; margin-bottom: 8px; font-size: 16px;">
+            <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+            Dicas Importantes
+        </h3>
+        <ul style="color: #0f766e; margin: 0; padding-left: 20px; line-height: 1.6;">
+            <li>Descreva o problema com detalhes</li>
+            <li>Informe a localização do equipamento</li>
+            <li>Acompanhe o status do seu chamado</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}
